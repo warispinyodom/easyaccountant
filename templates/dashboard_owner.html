@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block page_title %}ภาพรวมการเงินธุรกิจ (Business Owner Dashboard){% endblock %}
+
+{% block content %}
+<div class="grid-cards">
+    <div class="card card-stat">
+        <div class="stat-icon income-bg"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div>
+            <h3>รายรับรวม (Total Income)</h3>
+            <div class="amount income">฿{{ "{:,.2f}".format(income) }}</div>
+        </div>
+    </div>
+    <div class="card card-stat">
+        <div class="stat-icon expense-bg"><i class="fa-solid fa-arrow-trend-down"></i></div>
+        <div>
+            <h3>รายจ่ายรวม (Total Expense)</h3>
+            <div class="amount expense">฿{{ "{:,.2f}".format(expense) }}</div>
+        </div>
+    </div>
+    <div class="card card-stat">
+        <div class="stat-icon profit-bg"><i class="fa-solid fa-wallet"></i></div>
+        <div>
+            <h3>กำไรสุทธิ (Net Profit)</h3>
+            <div class="amount profit">฿{{ "{:,.2f}".format(profit) }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header-flex">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> รายการล่าสุด (Recent Transactions)</h3>
+        <a href="{{ url_for('invoices') }}" class="btn btn-sm"><i class="fa-solid fa-plus"></i> บันทึกรายการใหม่</a>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ประเภท</th>
+                    <th>หมวดหมู่</th>
+                    <th>รายละเอียด</th>
+                    <th>จำนวนเงิน</th>
+                    <th>เอกสารแนบ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td>
+                        {% if tx.type == 'INCOME' %}
+                        <span class="badge badge-success"><i class="fa-solid fa-circle-arrow-down"></i> รายรับ</span>
+                        {% else %}
+                        <span class="badge badge-danger"><i class="fa-solid fa-circle-arrow-up"></i> รายจ่าย</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tx.category }}</td>
+                    <td>{{ tx.description }}</td>
+                    <td><strong>฿{{ "{:,.2f}".format(tx.amount) }}</strong></td>
+                    <td>
+                        {% if tx.doc_url %}
+                        <a href="{{ tx.doc_url }}" target="_blank" rel="noopener noreferrer" class="link-doc">
+                            <i class="fa-solid fa-paperclip"></i> ดูเอกสาร
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted">ยังไม่มีข้อมูลรายการบัญชีในระบบ</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

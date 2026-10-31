@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block page_title %}ส่งเอกสารบัญชี & บันทึกรายการ{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h3><i class="fa-solid fa-file-circle-plus"></i> บันทึกรายการรายรับ/รายจ่าย</h3>
+    <p class="sub-text" style="margin-bottom: 1.5rem;">ข้อมูลและเอกสารแนบจะถูกจัดเก็บด้วยการเข้ารหัสความปลอดภัย</p>
+    
+    <form method="POST" enctype="multipart/form-data" id="transactionForm">
+        <!-- OWASP CSRF Protection Token -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label for="tx_type"><i class="fa-solid fa-list-check"></i> ประเภทรายการ *</label>
+                <select name="type" id="tx_type" class="form-control" required>
+                    <option value="INCOME">รายรับ (Income)</option>
+                    <option value="EXPENSE">รายจ่าย (Expense)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="amount"><i class="fa-solid fa-baht-sign"></i> จำนวนเงิน (บาท) *</label>
+                <input type="number" step="0.01" min="0.01" max="1000000000" id="amount" name="amount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label for="category"><i class="fa-solid fa-tags"></i> หมวดหมู่ *</label>
+                <input type="text" id="category" name="category" class="form-control" placeholder="เช่น ค่าวัตถุดิบ, ค่าบริการ" maxlength="100" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description"><i class="fa-solid fa-align-left"></i> รายละเอียดเพิ่มเติม</label>
+            <input type="text" id="description" name="description" class="form-control" placeholder="ระบุรายละเอียดสั้นๆ" maxlength="255">
+        </div>
+
+        <div class="form-group">
+            <label for="document"><i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดสลิป / ใบเสร็จ (.PNG, .JPG, .PDF ไม่เกิน 5MB)</label>
+            <input type="file" id="document" name="document" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+            <small id="fileHelp" class="form-text text-muted">ระบบจะตรวจสอบลายเซ็นไฟล์ (Magic Bytes) เพื่อป้องกันมัลแวร์</small>
+        </div>
+
+        <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> บันทึกรายการบัญชี</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3><i class="fa-solid fa-receipt"></i> ประวัติรายการทั้งหมด</h3>
+    <div class="table-container" style="margin-top: 1rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ประเภท</th>
+                    <th>หมวดหมู่</th>
+                    <th>รายละเอียด</th>
+                    <th>จำนวนเงิน</th>
+                    <th>เอกสารแนบ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td>
+                        {% if tx.type == 'INCOME' %}
+                        <span class="badge badge-success">รายรับ</span>
+                        {% else %}
+                        <span class="badge badge-danger">รายจ่าย</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tx.category }}</td>
+                    <td>{{ tx.description }}</td>
+                    <td>฿{{ "{:,.2f}".format(tx.amount) }}</td>
+                    <td>
+                        {% if tx.doc_url %}
+                        <a href="{{ tx.doc_url }}" target="_blank" rel="noopener noreferrer" class="link-doc">
+                            <i class="fa-solid fa-file-arrow-down"></i> เปิดดูเอกสาร
+                        </a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted">ยังไม่มีรายการบัญชี</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

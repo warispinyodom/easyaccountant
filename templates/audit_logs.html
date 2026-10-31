@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block page_title %}ศูนย์ตรวจสอบบันทึกความปลอดภัย (Audit & Security Logs){% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header-flex">
+        <div>
+            <h3><i class="fa-solid fa-shield-virus"></i> บันทึกกิจกรรมระบบ (System Event Logs)</h3>
+            <p class="sub-text">บันทึกประวัติการเข้าใช้งาน (ระบบจะจัดเก็บและลบข้อมูลเก่าให้อัตโนมัติเมื่อครบ 90 วัน)</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-sm" id="btn-filter-all" onclick="filterLogs('ALL')">ทั้งหมด</button>
+            <button class="btn btn-sm btn-secondary" id="btn-filter-audit" onclick="filterLogs('AUDIT')">Audit Logs</button>
+            <button class="btn btn-sm btn-secondary" id="btn-filter-security" onclick="filterLogs('SECURITY')">Security Incident</button>
+        </div>
+    </div>
+
+    <div class="table-container" style="margin-top: 1rem;">
+        <table id="logs-table">
+            <thead>
+                <tr>
+                    <th>วัน-เวลา</th>
+                    <th>ประเภท Log</th>
+                    <th>เหตุการณ์ (Action)</th>
+                    <th>ผู้กระทำ</th>
+                    <th>IP Address</th>
+                    <th>รายละเอียด (Details)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr class="log-row category-{{ log.category }}">
+                    <td style="white-space: nowrap;"><small><i class="fa-regular fa-clock"></i> {{ log.formatted_time }}</small></td>
+                    <td>
+                        {% if log.category == 'SECURITY' %}
+                        <span class="badge badge-danger"><i class="fa-solid fa-triangle-exclamation"></i> SECURITY</span>
+                        {% else %}
+                        <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> AUDIT</span>
+                        {% endif %}
+                    </td>
+                    <td><strong><code>{{ log.action }}</code></strong></td>
+                    <td>
+                        {% if log.username == 'GUEST' or log.username == 'ANONYMOUS' %}
+                        <span class="text-muted">{{ log.username }}</span>
+                        {% else %}
+                        <i class="fa-solid fa-user"></i> {{ log.username }}
+                        {% endif %}
+                    </td>
+                    <td><code>{{ log.ip_address }}</code></td>
+                    <td style="font-size: 0.88rem;">{{ log.details }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted">ยังไม่มีบันทึกข้อมูล Log ในระบบ</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterLogs(category) {
+    const rows = document.querySelectorAll('.log-row');
+    rows.forEach(row => {
+        if (category === 'ALL') {
+            row.style.display = '';
+        } else if (row.classList.contains('category-' + category)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // ปรับเปลี่ยนสีปุ่มตัวกรอง
+    document.getElementById('btn-filter-all').className = category === 'ALL' ? 'btn btn-sm' : 'btn btn-sm btn-secondary';
+    document.getElementById('btn-filter-audit').className = category === 'AUDIT' ? 'btn btn-sm' : 'btn btn-sm btn-secondary';
+    document.getElementById('btn-filter-security').className = category === 'SECURITY' ? 'btn btn-sm' : 'btn btn-sm btn-secondary';
+}
+</script>
+{% endblock %}

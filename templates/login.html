@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - EasyAccountant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-body">
+    <div class="card login-card">
+        <div class="login-header">
+            <i class="fa-solid fa-shield-halved security-icon"></i>
+            <h1>EasyAccountant</h1>
+            <p>ระบบจัดการบัญชีความปลอดภัยสูงสำหรับธุรกิจ</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category != 'message' else 'danger' }}">
+                  <i class="fa-solid fa-triangle-exclamation"></i> {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}" autocomplete="off">
+            <!-- OWASP CSRF Protection Token -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="username"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน (Username)</label>
+                <input type="text" id="username" name="username" class="form-control" required placeholder="กรอก Username" maxlength="50">
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-lock"></i> รหัสผ่าน (Password)</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="กรอก Password" autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-block">
+                <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบอย่างปลอดภัย
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <small><i class="fa-solid fa-lock"></i> เข้ารหัสการเชื่อมต่อแบบ SSL/TLS 256-bit</small>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyAccountant - บัญชีใกล้มือคุณ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-calculator"></i> EasyAccountant
+            </div>
+            <ul class="nav-links">
+                <li>
+                    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-pie"></i> ภาพรวมการเงิน
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('invoices') }}" class="{% if request.endpoint == 'invoices' %}active{% endif %}">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> เอกสาร/ใบเสร็จ
+                    </a>
+                </li>
+                {% if session.get('user', {}).get('role') == 'ADMIN' %}
+                <li>
+                    <a href="{{ url_for('manage_users') }}" class="{% if request.endpoint == 'manage_users' %}active{% endif %}">
+                        <i class="fa-solid fa-users-gear"></i> จัดการพนักงาน/ระบบ
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('view_logs') }}" class="{% if request.endpoint == 'view_logs' %}active{% endif %}">
+                        <i class="fa-solid fa-shield-virus"></i> Audit & Security Logs
+                    </a>
+                </li>
+                {% endif %}
+                <li style="margin-top: auto;">
+                    <a href="{{ url_for('logout') }}" class="logout-link">
+                        <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title-group">
+                    <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h2>{% block page_title %}ระบบบัญชีง่ายสำหรับธุรกิจ{% endblock %}</h2>
+                </div>
+                <div class="user-badge">
+                    <i class="fa-solid fa-circle-user"></i> 
+                    <span>{{ session.get('user', {}).get('name', 'ผู้ใช้งาน') }}</span> 
+                    <span class="role-tag role-{{ session.get('user', {}).get('role', 'OWNER')|lower }}">
+                        {{ session.get('user', {}).get('role') }}
+                    </span>
+                </div>
+            </header>
+
+            <!-- Alert Notification System -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="alert-container">
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                      <i class="fa-solid {% if category == 'danger' %}fa-circle-exclamation{% elif category == 'success' %}fa-circle-check{% else %}fa-circle-info{% endif %}"></i>
+                      <span>{{ message }}</span>
+                  </div>
+                {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

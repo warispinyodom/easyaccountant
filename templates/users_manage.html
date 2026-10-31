@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block page_title %}จัดการผู้ใช้งาน & เพิ่มพนักงานบัญชี{% endblock %}
+
+{% block content %}
+<div class="card card-form-center">
+    <h3><i class="fa-solid fa-user-plus"></i> เพิ่มบัญชีผู้ใช้งานใหม่</h3>
+    <p class="sub-text" style="margin-bottom: 1.5rem;">สร้างบัญชีผู้ใช้งานภายใต้เกณฑ์ความปลอดภัยของระบบ</p>
+
+    <form method="POST" action="{{ url_for('manage_users') }}" id="userForm">
+        <!-- OWASP CSRF Protection Token -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="name"><i class="fa-solid fa-id-card"></i> ชื่อ-นามสกุล *</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="เช่น สมนึก ใจดี" maxlength="100" required>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="username"><i class="fa-solid fa-user"></i> ชื่อผู้ใช้งาน (Username) *</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="เช่น user_accountant01" maxlength="30" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-key"></i> รหัสผ่าน (Password) *</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="กำหนดรหัสผ่าน" required>
+            </div>
+        </div>
+
+        <!-- Realtime Password Strength Guide -->
+        <div class="password-rules" id="passwordRules">
+            <div class="rule-item" id="rule-length"><i class="fa-solid fa-circle-xmark"></i> อย่างน้อย 8 ตัวอักษร</div>
+            <div class="rule-item" id="rule-upper"><i class="fa-solid fa-circle-xmark"></i> มีอักษรพิมพ์ใหญ่ (A-Z)</div>
+            <div class="rule-item" id="rule-lower"><i class="fa-solid fa-circle-xmark"></i> มีอักษรพิมพ์เล็ก (a-z)</div>
+            <div class="rule-item" id="rule-number"><i class="fa-solid fa-circle-xmark"></i> มีตัวเลข (0-9)</div>
+            <div class="rule-item" id="rule-special"><i class="fa-solid fa-circle-xmark"></i> มีอักขระพิเศษ (!@#$%^&*)</div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+            <label for="role"><i class="fa-solid fa-user-shield"></i> สิทธิ์การใช้งาน (Role) *</label>
+            <select id="role" name="role" class="form-control" required>
+                <option value="OWNER">เจ้าของกิจการ (Business Owner) - ดูภาพรวม/อัปโหลดเอกสาร</option>
+                <option value="ACCOUNTANT">พนักงานบัญชี (Accountant) - จัดการเอกสารและรายการบัญชี</option>
+                <option value="ADMIN">ผู้ดูแลระบบ (Admin) - สิทธิ์จัดการระบบสูงสุด</option>
+            </select>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn" style="flex: 1;"><i class="fa-solid fa-check"></i> ยืนยันสร้างบัญชี</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

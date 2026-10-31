@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block page_title %}แดชบอร์ดผู้ดูแลระบบ (Admin Security Dashboard){% endblock %}
+
+{% block content %}
+<div class="grid-cards">
+    <div class="card card-stat">
+        <div class="stat-icon profit-bg"><i class="fa-solid fa-users"></i></div>
+        <div>
+            <h3>สิทธิ์ผู้ใช้งานทั้งหมด</h3>
+            <div class="amount profit">Role Management</div>
+            <p class="sub-text">ผู้ดูแลระบบ, พนักงานบัญชี, เจ้าของธุรกิจ</p>
+        </div>
+    </div>
+    <div class="card card-stat">
+        <div class="stat-icon profit-bg"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+            <h3>ระบบตรวจสอบ Log</h3>
+            <div class="amount profit" style="color: #10b981;">Audit Active</div>
+            <p class="sub-text">บันทึกเหตุการณ์ OWASP Logging 24/7</p>
+        </div>
+    </div>
+    <div class="card card-stat">
+        <div class="stat-icon profit-bg"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div>
+            <h3>คลังเอกสาร Supabase</h3>
+            <div class="amount profit" style="color: #0f766e;">Storage Protected</div>
+            <p class="sub-text">จำกัดขนาด 5MB & ตรวจสอบ Magic Bytes</p>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header-flex">
+        <div>
+            <h3><i class="fa-solid fa-user-shield"></i> การจัดการระบบ EasyAccountant</h3>
+            <p class="sub-text">เมนูบริหารจัดการบัญชีผู้ใช้งาน และการเข้าถึงระบบ</p>
+        </div>
+        <a href="{{ url_for('manage_users') }}" class="btn"><i class="fa-solid fa-user-plus"></i> เพิ่มผู้ใช้งานใหม่</a>
+    </div>
+
+    <div class="grid-cards-2">
+        <div class="admin-menu-box">
+            <h4><i class="fa-solid fa-user-gear"></i> จัดการสิทธิ์ผู้ใช้งาน (RBAC)</h4>
+            <p>สร้างบัญชี และควบคุมระดับการเข้าถึงสิทธิ์ (ADMIN, ACCOUNTANT, OWNER)</p>
+            <a href="{{ url_for('manage_users') }}" class="menu-link">ไปหน้าจัดการผู้ใช้ <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        
+        <div class="admin-menu-box">
+            <h4><i class="fa-solid fa-clock-rotate-left"></i> บันทึกเหตุการณ์ & ความปลอดภัย</h4>
+            <p>ตรวจสอบ Log การเข้าสู่ระบบ, การทำธุรกรรม และการแจ้งเตือนภัยคุกคาม Cyber</p>
+            <a href="{{ url_for('view_logs') }}" class="menu-link">เข้าดูศูนย์บันทึก Log <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header-flex">
+        <h3><i class="fa-solid fa-list-check"></i> เหตุการณ์สแกนล่าสุด (Recent System Logs)</h3>
+        <a href="{{ url_for('view_logs') }}" class="btn btn-sm"><i class="fa-solid fa-eye"></i> ดูทั้งหมด</a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>วัน-เวลา</th>
+                    <th>ประเภท</th>
+                    <th>การกระทำ</th>
+                    <th>ผู้ใช้งาน</th>
+                    <th>IP Address</th>
+                    <th>รายละเอียด</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr>
+                    <td><small>{{ log.formatted_time }}</small></td>
+                    <td>
+                        {% if log.category == 'SECURITY' %}
+                        <span class="badge badge-danger">SECURITY</span>
+                        {% else %}
+                        <span class="badge badge-success">AUDIT</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ log.action }}</strong></td>
+                    <td>{{ log.username }}</td>
+                    <td><code>{{ log.ip_address }}</code></td>
+                    <td>{{ log.details }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted">ยังไม่มีบันทึก Log ในระบบ</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
