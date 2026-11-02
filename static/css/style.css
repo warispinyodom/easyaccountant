@@ -10,6 +10,7 @@
   --card-bg: #ffffff;
   --border: #e2e8f0;
   --danger: #ef4444;
+  --danger-hover: #dc2626;
   --success: #10b981;
   --warning: #f59e0b;
 }
@@ -278,8 +279,10 @@ th { background: #f8fafc; font-weight: 600; color: #475569; }
   text-decoration: none;
 }
 .btn:hover { background: var(--primary-hover); }
-.btn-secondary { background: #94a3b8; }
+.btn-secondary { background: #94a3b8; color: white; }
 .btn-secondary:hover { background: #64748b; }
+.btn-danger { background-color: var(--danger); color: white; }
+.btn-danger:hover { background-color: var(--danger-hover); }
 .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
 .btn-block { width: 100%; }
 
@@ -292,6 +295,42 @@ th { background: #f8fafc; font-weight: 600; color: #475569; }
   border-color: var(--text-muted) !important;
   box-shadow: none !important;
 }
+
+/* Modal Popup Window */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  width: 100%;
+  max-width: 550px;
+  border-radius: 12px;
+  padding: 1.8rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.btn-close:hover { color: var(--danger); }
 
 /* Login Page Styling */
 .login-body {
@@ -342,4 +381,5 @@ th { background: #f8fafc; font-weight: 600; color: #475569; }
   .sidebar.active { transform: translateX(0); }
   .main-content { padding: 1rem; }
   .grid-cards { grid-template-columns: 1fr; }
+  .modal-content { padding: 1.2rem; }
 }

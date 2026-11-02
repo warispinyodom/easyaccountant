@@ -75,6 +75,67 @@ def save_transaction(user_id, tx_type, amount, category, description, doc_url=No
         'created_at': {".sv": "timestamp"}
     })
 
+def get_transaction_by_id(tx_id):
+    """ ดึงข้อมูลรายการตาม Transaction Key """
+    ref = db.reference(f'transactions/{tx_id}')
+    tx = ref.get()
+    if isinstance(tx, dict):
+        tx['id'] = tx_id
+        return tx
+    return None
+
+def update_transaction(tx_id, user_id, user_role, tx_type, amount, category, description, doc_url=None):
+    """ แก้ไขรายการบัญชีพร้อมตรวจสอบสิทธิ์การใช้งาน """
+    tx = get_transaction_by_id(tx_id)
+    if not tx:
+        raise ValueError("ไม่พบรายการที่ต้องการแก้ไข")
+    
+    # 🔒 Security Check: เจ้าของรายการ หรือ Admin/Accountant เท่านั้นที่มีสิทธิ์แก้ไข
+    if tx.get('user_id') != user_id and user_role not in ['ADMIN', 'ACCOUNTANT']:
+        raise PermissionError("คุณไม่มีสิทธิ์แก้ไขรายการนี้")
+
+    tx_type = sanitize_input(tx_type).upper()
+    category = sanitize_input(category)
+    description = sanitize_input(description)
+
+    if tx_type not in ['INCOME', 'EXPENSE']:
+        raise ValueError("ประเภทรายการไม่ถูกต้อง")
+
+    try:
+        val_amount = float(amount)
+        if val_amount <= 0 or val_amount > 1_000_000_000:
+            raise ValueError()
+    except ValueError:
+        raise ValueError("จำนวนเงินต้องเป็นตัวเลขที่ถูกต้องและมากกว่า 0")
+
+    update_data = {
+        'type': tx_type,
+        'amount': val_amount,
+        'category': category,
+        'description': description,
+        'updated_at': {".sv": "timestamp"}
+    }
+    if doc_url:
+        update_data['doc_url'] = doc_url
+
+    ref = db.reference(f'transactions/{tx_id}')
+    ref.update(update_data)
+    return True
+
+def delete_transaction(tx_id, user_id, user_role):
+    """ ลบรายการบัญชีพร้อมตรวจสอบสิทธิ์การใช้งาน """
+    tx = get_transaction_by_id(tx_id)
+    if not tx:
+        raise ValueError("ไม่พบรายการที่ต้องการลบ")
+    
+    # 🔒 Security Check: เจ้าของรายการ หรือ Admin/Accountant เท่านั้นที่มีสิทธิ์ลบ
+    if tx.get('user_id') != user_id and user_role not in ['ADMIN', 'ACCOUNTANT']:
+        raise PermissionError("คุณไม่มีสิทธิ์ลบรายการนี้")
+
+    ref = db.reference(f'transactions/{tx_id}')
+    ref.delete()
+    return True
+
 def get_user_transactions(user_id):
     ref = db.reference('transactions')
     try:
@@ -86,7 +147,15 @@ def get_user_transactions(user_id):
         else:
             txs = None
             
-    return list(txs.values()) if txs and isinstance(txs, dict) else []
+    tx_list = []
+    if txs and isinstance(txs, dict):
+        for key, val in txs.items():
+            if isinstance(val, dict):
+                val['id'] = key
+                tx_list.append(val)
+                
+    tx_list.sort(key=lambda x: x.get('created_at', 0) if isinstance(x.get('created_at'), (int, float)) else 0, reverse=True)
+    return tx_list
 
 def log_event(category, action, details, user_id="ANONYMOUS", username="GUEST", ip_address="", user_agent=""):
     ref = db.reference('audit_logs')
@@ -102,11 +171,7 @@ def log_event(category, action, details, user_id="ANONYMOUS", username="GUEST", 
     })
 
 def cleanup_old_audit_logs(days=90):
-    """
-    ลบ Audit & Security Logs ที่มีอายุเกินจำนวนวันที่กำหนด (Default: 90 วัน)
-    """
     ref = db.reference('audit_logs')
-    # คำนวณช่วงเวลา Cutoff Timestamp ย้อนหลัง 90 วัน (มิลลิวินาที)
     cutoff_time = (time.time() - (days * 24 * 60 * 60)) * 1000
     
     try:
@@ -127,9 +192,7 @@ def cleanup_old_audit_logs(days=90):
                 ref.update(updates)
 
 def get_audit_logs(limit=150):
-    # เรียกเคลียร์ Log ที่มีอายุเกิน 90 วันก่อนดึงรายการไปแสดงผล
     cleanup_old_audit_logs(days=90)
-
     ref = db.reference('audit_logs')
     try:
         logs = ref.order_by_child('timestamp').limit_to_last(limit).get()

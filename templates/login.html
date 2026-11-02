@@ -6,6 +6,10 @@
     <title>เข้าสู่ระบบ - EasyAccountant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 CSS & JS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 </head>
 <body class="login-body">
     <div class="card login-card">
@@ -15,18 +19,25 @@
             <p>ระบบจัดการบัญชีความปลอดภัยสูงสำหรับธุรกิจ</p>
         </div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
+        <!-- Hybrid Alert System -->
+        {% set messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <!-- 1. HTML Fallback Alert Container -->
+            <div class="alert-container" id="html-alert-box" style="margin-bottom: 1rem;">
             {% for category, message in messages %}
               <div class="alert alert-{{ category if category != 'message' else 'danger' }}">
                   <i class="fa-solid fa-triangle-exclamation"></i> {{ message }}
               </div>
             {% endfor %}
-          {% endif %}
-        {% endwith %}
+            </div>
 
-        <form method="POST" action="{{ url_for('login') }}" autocomplete="off">
-            <!-- OWASP CSRF Protection Token -->
+            <!-- 2. JSON Script Element for SweetAlert2 -->
+            <script id="flash-messages-data" type="application/json">
+                {{ messages | tojson | safe }}
+            </script>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}" autocomplete="off" id="loginForm">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <div class="form-group">
@@ -48,5 +59,8 @@
             <small><i class="fa-solid fa-lock"></i> เข้ารหัสการเชื่อมต่อแบบ SSL/TLS 256-bit</small>
         </div>
     </div>
+
+    <!-- บังคับล้าง Cache JS ด้วย v=1.1 -->
+    <script src="{{ url_for('static', filename='js/main.js', v='1.1') }}"></script>
 </body>
 </html>

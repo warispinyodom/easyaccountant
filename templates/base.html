@@ -6,6 +6,10 @@
     <title>EasyAccountant - บัญชีใกล้มือคุณ</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 CSS & JS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -63,24 +67,30 @@
                 </div>
             </header>
 
-            <!-- Alert Notification System -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div class="alert-container">
+            <!-- Hybrid Alert System (HTML Alert + SweetAlert Data) -->
+            {% set messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <!-- 1. HTML Fallback Alert Container -->
+                <div class="alert-container" id="html-alert-box" style="margin-bottom: 1rem;">
                 {% for category, message in messages %}
                   <div class="alert alert-{{ category if category != 'message' else 'info' }}">
-                      <i class="fa-solid {% if category == 'danger' %}fa-circle-exclamation{% elif category == 'success' %}fa-circle-check{% else %}fa-circle-info{% endif %}"></i>
+                      <i class="fa-solid {% if category == 'danger' or category == 'error' %}fa-circle-exclamation{% elif category == 'success' %}fa-circle-check{% elif category == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
                       <span>{{ message }}</span>
                   </div>
                 {% endfor %}
                 </div>
-              {% endif %}
-            {% endwith %}
+
+                <!-- 2. JSON Script Element for SweetAlert2 -->
+                <script id="flash-messages-data" type="application/json">
+                    {{ messages | tojson | safe }}
+                </script>
+            {% endif %}
 
             {% block content %}{% endblock %}
         </main>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- บังคับล้าง Cache JS ด้วย v=1.1 -->
+    <script src="{{ url_for('static', filename='js/main.js', v='1.1') }}"></script>
 </body>
 </html>
